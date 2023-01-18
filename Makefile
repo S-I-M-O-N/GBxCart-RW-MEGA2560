@@ -1,6 +1,6 @@
 # Hey Emacs, this is a -*- makefile -*-
 #----------------------------------------------------------------------------
-# WinAVR Makefile Template written by Eric B. Weddington, Jörg Wunsch, et al.
+# WinAVR Makefile Template written by Eric B. Weddington, Jï¿½rg Wunsch, et al.
 #
 # Released to the Public Domain
 #
@@ -41,24 +41,24 @@
 
 
 # MCU name
-MCU = atmega8515
+MCU = atmega2560
 
 # MCU fuses
-MCU_FUSES = -U lfuse:w:0xaf:m -U hfuse:w:0xda:m
+#MCU_FUSES = -U lfuse:w:0xaf:m -U hfuse:w:0xda:m
 
 
 # COM Port
-COM_PORT = 16
+COM_PORT = /dev/ttyUSB0
 
 TSB = tsb/tsb.exe
 TSBADV = tsb/tsbloader_adv.exe
 
 # TSB settings
-TSB_SETTINGS = com$(COM_PORT):9600 T 25
+TSB_SETTINGS = $(COM_PORT):9600 T 25
 
 # TSB program
-TSB_PROGRAM = com$(COM_PORT):57600 fw
-TSBADV_PROGRAM = -port=COM$(COM_PORT) -fop=w -ffile=
+TSB_PROGRAM = $(COM_PORT):57600 fw
+TSBADV_PROGRAM = -port=$(COM_PORT) -fop=w -ffile=
 #TSBADVFLASH = tsb\\tsbloader_adv.exe -port=COM16 -fop=w -ffile=main.hex
 
 # TSB boot loader
@@ -298,12 +298,12 @@ LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 # to get a full listing.
 #
 #AVRDUDE_PROGRAMMER = usbtiny
-AVRDUDE_PROGRAMMER = usbasp
+AVRDUDE_PROGRAMMER = wiring
 
 # com1 = serial port. Use lpt1 to connect to parallel port.
-#AVRDUDE_PORT = com2    # programmer connected to serial device
+AVRDUDE_PORT = -P /dev/ttyUSB0    # programmer connected to serial device
 
-AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
+AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex:i
 #AVRDUDE_WRITE_EEPROM = -U eeprom:w:$(TARGET).eep
 
 
@@ -316,16 +316,22 @@ AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 # performed after programming the device.
 #AVRDUDE_NO_VERIFY = -V
 
+# Uncomment the following if you do /not/ wish to erase flash
+# before programming the device.
+AVRDUDE_NO_ERASE = -D
+
 # Increase verbosity level.  Please use this when submitting bug
 # reports about avrdude. See <http://savannah.nongnu.org/projects/avrdude> 
 # to submit bug reports.
 #AVRDUDE_VERBOSE = -v -v
 
 #AVRDUDE_BITS_PER_SEC = -b 19200
-AVRDUDE_BITS_PER_SEC = -b 19200
+AVRDUDE_BITS_PER_SEC = -b 115200
 
 AVRDUDE_FLAGS = -p $(MCU) -c $(AVRDUDE_PROGRAMMER)
+AVRDUDE_FLAGS += $(AVRDUDE_PORT)
 AVRDUDE_FLAGS += $(AVRDUDE_NO_VERIFY)
+AVRDUDE_FLAGS += $(AVRDUDE_NO_ERASE)
 AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
 AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
 AVRDUDE_FLAGS += $(AVRDUDE_BITS_PER_SEC)
@@ -366,13 +372,13 @@ DEBUG_HOST = localhost
 
 # Define programs and commands.
 SHELL = sh
-CC = c:/WinAVR-20100110/bin/avr-gcc
-OBJCOPY = c:/WinAVR-20100110/bin/avr-objcopy
-OBJDUMP = c:/WinAVR-20100110/bin/avr-objdump
-SIZE = c:/WinAVR-20100110/bin/avr-size
-AR = c:/WinAVR-20100110/bin/avr-ar rcs
-NM = c:/WinAVR-20100110/bin/avr-nm
-AVRDUDE = c:/WinAVR-20100110/bin/avrdude
+CC = avr-gcc
+OBJCOPY = avr-objcopy
+OBJDUMP = avr-objdump
+SIZE = avr-size
+AR = avr-ar rcs
+NM = avr-nm
+AVRDUDE = avrdude
 REMOVE = rm -f
 REMOVEDIR = rm -rf
 COPY = cp
@@ -424,6 +430,7 @@ ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
 
 
 # Default target.
+#all: begin gccversion sizebefore build sizeafter end
 all: begin gccversion sizebefore build sizeafter end
 
 # Change the build target to build a HEX file or a library.

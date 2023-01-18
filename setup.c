@@ -24,43 +24,43 @@
 #define false 0
 #define true 1
 
-#define VOLTAGE_SELECT PD2
-#define ACTIVITY_LED PD3
-#define LED_5V PD7
-#define LED_3V PE0
+//#define VOLTAGE_SELECT PE0 // geht das?
+#define ACTIVITY_LED PB7
+//#define LED_5V PE2 // geht das?
+//#define LED_3V PE1 // geht das?
 
-#define WR_PIN PD6
-#define RD_PIN PD5
-#define CS_MREQ_PIN PD4
-#define CS2_PIN PE2
-#define AUDIO_PIN PE1
+#define WR_PIN PD7
+#define RD_PIN PG2
+#define CS_MREQ_PIN PG1
+#define CS2_PIN PB3
+#define AUDIO_PIN PB2
 
 #define wrPin_high	PORTD |= (1<<WR_PIN);
 #define wrPin_low		PORTD &= ~(1<<WR_PIN);
-#define rdPin_high	PORTD |= (1<<RD_PIN);
-#define rdPin_low		PORTD &= ~(1<<RD_PIN);
-#define cs_mreqPin_high		PORTD |= (1<<CS_MREQ_PIN);
-#define cs_mreqPin_low		PORTD &= ~(1<<CS_MREQ_PIN);
-#define cs2Pin_high		PORTE |= (1<<CS2_PIN);
-#define cs2Pin_low		PORTE &= ~(1<<CS2_PIN);
-#define audioPin_high	PORTE |= (1<<AUDIO_PIN);
-#define audioPin_low		PORTE &= ~(1<<AUDIO_PIN);
+#define rdPin_high	PORTG |= (1<<RD_PIN);
+#define rdPin_low		PORTG &= ~(1<<RD_PIN);
+#define cs_mreqPin_high		PORTG |= (1<<CS_MREQ_PIN);
+#define cs_mreqPin_low		PORTG &= ~(1<<CS_MREQ_PIN);
+#define cs2Pin_high		PORTB |= (1<<CS2_PIN);
+#define cs2Pin_low		PORTB &= ~(1<<CS2_PIN);
+#define audioPin_high	PORTB |= (1<<AUDIO_PIN);
+#define audioPin_low	PORTB &= ~(1<<AUDIO_PIN);
 
 #define GB_MODE 1
 #define GBA_MODE 2
 
 // GB/GBC
-#define PORT_ADDR7_0 PORTB
-#define PORT_ADDR15_8 PORTA
-#define PORT_DATA7_0 PORTC
+#define PORT_ADDR7_0 PORTA
+#define PORT_ADDR15_8 PORTC
+#define PORT_DATA7_0 PORTL
 
-#define DDR_ADDR7_0 DDRB
-#define DDR_ADDR15_8 DDRA
-#define DDR_DATA7_0 DDRC
+#define DDR_ADDR7_0 DDRA
+#define DDR_ADDR15_8 DDRC
+#define DDR_DATA7_0 DDRL
 
-#define PIN_ADDR7_0 PINB
-#define PIN_ADDR15_8 PINA
-#define PIN_DATA7_0 PINC
+#define PIN_ADDR7_0 PINA
+#define PIN_ADDR15_8 PINC
+#define PIN_DATA7_0 PINL
 
 #define BANK_WRITE 0
 #define MEMORY_WRITE 1
@@ -77,30 +77,30 @@
 #define ad0Pin_high		PORTB |= (1<<AD0);
 #define ad0Pin_low		PORTB &= ~(1<<AD0);
 
-#define A23 PC7
-#define a23Pin_high		PORTC |= (1<<A23);
-#define a23Pin_low		PORTC &= ~(1<<A23);
+#define A23 PK7
+#define a23Pin_high		PORTK |= (1<<A23);
+#define a23Pin_low		PORTK &= ~(1<<A23);
 
-#define GBA_DDR_ROM_ADDR7_0 DDRB
-#define GBA_DDR_ROM_ADDR15_8 DDRA
-#define GBA_DDR_ROM_ADDR23_16 DDRC
-#define GBA_DDR_ROM_DATA7_0 DDRB
-#define GBA_DDR_ROM_DATA15_8 DDRA
-#define GBA_DDR_RAM_DATA7_0 DDRC
-#define GBA_DDR_EEPROM_DATA7_0 DDRB
+#define GBA_DDR_ROM_ADDR7_0 DDRA
+#define GBA_DDR_ROM_ADDR15_8 DDRC
+#define GBA_DDR_ROM_ADDR23_16 DDRK
+#define GBA_DDR_ROM_DATA7_0 DDRL
+#define GBA_DDR_ROM_DATA15_8 DDRK
+#define GBA_DDR_RAM_DATA7_0 DDRK
+#define GBA_DDR_EEPROM_DATA7_0 DDRK
 
-#define GBA_PORT_ROM_ADDR7_0 PORTB
-#define GBA_PORT_ROM_ADDR15_8 PORTA
-#define GBA_PORT_ROM_ADDR23_16 PORTC
-#define GBA_PORT_ROM_DATA7_0 PORTB
-#define GBA_PORT_ROM_DATA15_8 PORTA
-#define GBA_PORT_RAM_DATA7_0 PORTC
-#define GBA_PORT_EEPROM_DATA7_0 PORTB
+#define GBA_PORT_ROM_ADDR7_0 PORTA
+#define GBA_PORT_ROM_ADDR15_8 PORTC
+#define GBA_PORT_ROM_ADDR23_16 PORTK
+#define GBA_PORT_ROM_DATA7_0 PORTL
+#define GBA_PORT_ROM_DATA15_8 PORTK
+#define GBA_PORT_RAM_DATA7_0 PORTK
+#define GBA_PORT_EEPROM_DATA7_0 PORTK
 
-#define GBA_PIN_ROM_DATA7_0 PINB
-#define GBA_PIN_ROM_DATA15_8 PINA
-#define GBA_PIN_RAM_DATA7_0 PINC
-#define GBA_PIN_EEPROM_DATA7_0 PINB
+#define GBA_PIN_ROM_DATA7_0 PINA
+#define GBA_PIN_ROM_DATA15_8 PINC
+#define GBA_PIN_RAM_DATA7_0 PINK
+#define GBA_PIN_EEPROM_DATA7_0 PINL
 
 // GB/GBC commands
 #define SET_START_ADDRESS 'A'
@@ -199,14 +199,14 @@ uint8_t cartMode = GBA_MODE;
 
 // Receive USART data
 uint8_t USART_Receive(void) {
-	while ( !(UCSRA & (1<<RXC)) ); // Wait for data to be received
-	return UDR; // Get and return received data from buffer
+	while ( !(UCSR0A & (1<<RXC0)) ); // Wait for data to be received
+	return UDR0; // Get and return received data from buffer
 }
 
 // Transmit USART data
 void USART_Transmit(unsigned char data) {
-	while ( !( UCSRA & (1<<UDRE)) ); // Wait for empty transmit buffer
-	UDR = data;
+	while ( !( UCSR0A & (1<<UDRE0)) ); // Wait for empty transmit buffer
+	UDR0 = data;
 }
 
 // Read 1-256 bytes from the USART 
@@ -751,9 +751,9 @@ void gb_flash_write_byte_special(uint16_t address, uint8_t data) {
 	DDR_DATA7_0 = 0;
 	
 	// Pulse reset
-	PORTE &= ~(1<<CS2_PIN);
+	PORTB &= ~(1<<CS2_PIN);
 	_delay_us(50);
-	PORTE |= (1<<CS2_PIN);
+	PORTB |= (1<<CS2_PIN);
 	_delay_us(50);
 }
 
@@ -959,7 +959,7 @@ void stop_timeout_timer(void) {
 	writingTimedout = 0;
 	TCNT1 = 0;
 	TCCR1B = 0;
-	PORTD &= ~(1<<ACTIVITY_LED);
+	PORTB &= ~(1<<ACTIVITY_LED);
 }
 
 // If we didn't time out, stop the timeout timer and send back an ACK
@@ -967,7 +967,7 @@ void check_if_timed_out(void) {
 	if (writingTimedout == 0) {
 		stop_timeout_timer();		
 		USART_Transmit(SEND_ACK); // Send back acknowledgement
-		PORTD &= ~(1<<ACTIVITY_LED);
+		PORTB &= ~(1<<ACTIVITY_LED);
 	}
 }
 
@@ -975,16 +975,17 @@ void check_if_timed_out(void) {
 // Setup
 void setup(void) {
 	// Turn off watchdog
-	MCUCSR &= ~(1<<WDRF);
-	WDTCR = (1<<WDCE) | (1<<WDE);
-	WDTCR = 0;
+	MCUSR &= ~(1<<WDRF);
+	WDTCSR = (1<<WDCE) | (1<<WDE);
+	WDTCSR = 0;
 	
 	// Reset common lines
 	rd_wr_csmreq_cs2_reset();
 	
 	// Set outputs
-	DDRD |= (1<<ACTIVITY_LED) | (1<<WR_PIN) | (1<<RD_PIN) | (1<<CS_MREQ_PIN) | (1<<LED_5V) | (1<<VOLTAGE_SELECT);
-	DDRE |= (1<<CS2_PIN) | (1<<LED_3V);
+	DDRD |= (1<<WR_PIN);
+	DDRB |= (1<<ACTIVITY_LED) | (1<<CS2_PIN);
+	DDRG |= (1<<RD_PIN) | (1<<CS_MREQ_PIN);
 	
 	// Set all pins as inputs
 	PORT_DATA7_0 = 0;
@@ -996,27 +997,27 @@ void setup(void) {
 	
 	// Light up 3.3V or 5V
 	if (cartMode == GB_MODE) {
-		PORTD |= (1<<LED_5V);
-		PORTE &= ~(1<<LED_3V);
+		//PORTD |= (1<<LED_5V);
+		//PORTE &= ~(1<<LED_3V);
 	}
 	else {
-		PORTE |= (1<<LED_3V);
-		PORTD &= ~(1<<LED_5V);
+		//PORTE |= (1<<LED_3V);
+		//PORTD &= ~(1<<LED_5V);
 	}
 	
 	// Light LED
-	PORTD |= (1<<ACTIVITY_LED);
+	PORTB |= (1<<ACTIVITY_LED);
 	_delay_ms(500);
-	PORTD &= ~(1<<ACTIVITY_LED);
+	PORTB &= ~(1<<ACTIVITY_LED);
 	
 	// Setup USART
-	UBRRL = 0; // 1Mbps Baud rate
-	sbi(UCSRA, U2X); // Double rate
-	sbi(UCSRB, TXEN); // Transmitter enable
-	sbi(UCSRB, RXEN); // Receiver enable
+	UBRR0L = 0x01; // 1Mbps Baud rate 
+	sbi(UCSR0A, U2X0); // Double rate
+	sbi(UCSR0B, TXEN0); // Transmitter enable
+	sbi(UCSR0B, RXEN0); // Receiver enable
 	
 	// Timer1 setup
-	TIMSK |= (1<<TOIE1);
+	TIMSK1 |= (1<<TOIE1);
 	TCNT1 = 0;
 	
 	// Turn on interrupts

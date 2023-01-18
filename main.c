@@ -38,8 +38,10 @@
 // AD0-AD7 PB0-7 (40-44, 1-3) 	AD8-AD15 PA0-7 (37-30)		A16-23 / D0-D7 PC0-7 (19-26)
 // *WR PD6 (13)						*RD PD5 (14)					*MREQ/CS PD4 (15)			CS2/RST PE2 (16)
 
-#define F_CPU 8000000 // 8 MHz
+// #define F_CPU 8000000 // 8 MHz
+#define F_CPU 16000000 // 16 MHz
 #define PCB_VERSION 4
+//#define FIRMWARE_VERSION 22
 #define FIRMWARE_VERSION 22
 
 #include <avr/io.h>
@@ -84,17 +86,17 @@ int main(void) {
 		
 		// Switch voltage if requested
 		else if (receivedChar == VOLTAGE_3_3V) {
-			PORTD &= ~(1<<VOLTAGE_SELECT);
+			//PORTE &= ~(1<<VOLTAGE_SELECT);
 			cartMode = GBA_MODE;
-			PORTE |= (1<<LED_3V);
-			PORTD &= ~(1<<LED_5V);
+			//PORTE |= (1<<LED_3V);
+			//PORTE &= ~(1<<LED_5V);
 			stop_timeout_timer();
 		}
 		else if (receivedChar == VOLTAGE_5V) {
-			PORTD |= (1<<VOLTAGE_SELECT);
+			//PORTD |= (1<<VOLTAGE_SELECT);
 			cartMode = GB_MODE;
-			PORTD |= (1<<LED_5V);
-			PORTE &= ~(1<<LED_3V);
+			//PORTD |= (1<<LED_5V);
+			//PORTE &= ~(1<<LED_3V);
 			stop_timeout_timer();
 		}
 		
@@ -112,13 +114,13 @@ int main(void) {
 			gb_mode();
 			receivedChar = '1';
 			while (receivedChar == '1') {
-				PORTD |= (1<<ACTIVITY_LED);
+				PORTB |= (1<<ACTIVITY_LED);
 				for (uint8_t x = 0; x < 64; x++) {
 					USART_Transmit(read_8bit_data(address));
 					address++;
 				}
 				
-				PORTD &= ~(1<<ACTIVITY_LED);
+				PORTB &= ~(1<<ACTIVITY_LED);
 				receivedChar = USART_Receive();
 			}
 		}
@@ -126,12 +128,12 @@ int main(void) {
 		// Read and send 0x4000 bytes of data
 		else if (receivedChar == READ_ROM_4000H) {
 			gb_mode();
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			for (uint16_t x = 0; x < 0x4000; x++) {
 				USART_Transmit(read_8bit_data(address));
 				address++;
 			}
-			PORTD &= ~(1<<ACTIVITY_LED);
+			PORTB &= ~(1<<ACTIVITY_LED);
 		}
 		
 		// Write 64 bytes to RAM on address (and increment)
@@ -141,13 +143,13 @@ int main(void) {
 			// Read 64 bytes first as CH340G sends them all at once
 			usart_read_bytes(64);
 			
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			for (uint8_t x = 0; x < 64; x++) {
 				write_8bit_data(address, receivedBuffer[x], MEMORY_WRITE);
 				address++;
 			}
 			
-			PORTD &= ~(1<<ACTIVITY_LED);
+			PORTB &= ~(1<<ACTIVITY_LED);
 			USART_Transmit(SEND_ACK); // Send back acknowledgement
 		}
 		
@@ -183,7 +185,7 @@ int main(void) {
 			
 			receivedChar = '1';
 			while (receivedChar == '1') {
-				PORTD |= (1<<ACTIVITY_LED);
+				PORTB |= (1<<ACTIVITY_LED);
 				
 				for (uint8_t x = 0; x < readEnd; x++) {
 					uint16_t dataRead = gba_read_16bit_data(address);
@@ -195,7 +197,7 @@ int main(void) {
 					address++;
 				}
 				
-				PORTD &= ~(1<<ACTIVITY_LED);
+				PORTB &= ~(1<<ACTIVITY_LED);
 				receivedChar = USART_Receive();
 			}
 		}
@@ -204,7 +206,7 @@ int main(void) {
 		else if (receivedChar == GBA_READ_ROM_8000H) {
 			gba_mode();
 			
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			gba_set_24bit_address(address);
 			cs_mreqPin_low;
 			
@@ -223,7 +225,7 @@ int main(void) {
 			}
 			address += 0x8000;
 			
-			PORTD &= ~(1<<ACTIVITY_LED);
+			PORTB &= ~(1<<ACTIVITY_LED);
 		}
 		
 		// ---------- SRAM ----------
@@ -233,13 +235,13 @@ int main(void) {
 			
 			receivedChar = '1';
 			while (receivedChar == '1') {
-				PORTD |= (1<<ACTIVITY_LED);
+				PORTB |= (1<<ACTIVITY_LED);
 				for (uint8_t x = 0; x < 64; x++) {
 					USART_Transmit(gba_read_ram_8bit_data(address));
 					address++;
 				}
 				
-				PORTD &= ~(1<<ACTIVITY_LED);
+				PORTB &= ~(1<<ACTIVITY_LED);
 				receivedChar = USART_Receive();
 			}
 			
@@ -252,14 +254,14 @@ int main(void) {
 			
 			usart_read_bytes(64);
 			
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			for (uint8_t x = 0; x < 64; x++) {
 				gba_write_ram_8bit_data(address, receivedBuffer[x]);
 				address++;
 			}
 			USART_Transmit(SEND_ACK); // Send back acknowledgement
 			
-			PORTD &= ~(1<<ACTIVITY_LED);
+			PORTB &= ~(1<<ACTIVITY_LED);
 			gba_mode(); // Set back
 		}
 		
@@ -317,14 +319,14 @@ int main(void) {
 			
 			usart_read_bytes(64);
 			
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			for (uint8_t x = 0; x < 64; x++) {
 				flash_write_byte(address, receivedBuffer[x]);
 				address++;
 			}
 			USART_Transmit(SEND_ACK); // Send back acknowledgement
 			
-			PORTD &= ~(1<<ACTIVITY_LED);
+			PORTB &= ~(1<<ACTIVITY_LED);
 			gba_mode(); // Set back
 		}
 		
@@ -334,12 +336,12 @@ int main(void) {
 			
 			usart_read_bytes(128);
 			
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			flash_write_sector(address); // Address used as sector number
 			address++;
 			USART_Transmit(SEND_ACK); // Send back acknowledgement
 			
-			PORTD &= ~(1<<ACTIVITY_LED);
+			PORTB &= ~(1<<ACTIVITY_LED);
 			gba_mode(); // Set back
 		}
 		
@@ -357,7 +359,7 @@ int main(void) {
 			
 			receivedChar = '1';
 			while (receivedChar == '1') {
-				PORTD |= (1<<ACTIVITY_LED);
+				PORTB |= (1<<ACTIVITY_LED);
 				gba_eeprom_read(address, eepromSize);
 				
 				// Send back the 8 bytes of data
@@ -366,7 +368,7 @@ int main(void) {
 				}
 				address++; // Increment to next 8 bytes
 				
-				PORTD &= ~(1<<ACTIVITY_LED);
+				PORTB &= ~(1<<ACTIVITY_LED);
 				receivedChar = USART_Receive();
 			}
 			
@@ -381,7 +383,7 @@ int main(void) {
 			for (uint8_t x = 0; x < 8; x++) {
 				eepromBuffer[x] = USART_Receive();
 			}
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			
 			gba_eeprom_write(address, eepromSize);
 			address++;
@@ -389,7 +391,7 @@ int main(void) {
 			_delay_ms(8); // Wait for EEPROM to write data (8ms)
 			USART_Transmit(SEND_ACK); // Send back acknowledgement
 			
-			PORTD &= ~(1<<ACTIVITY_LED);
+			PORTB &= ~(1<<ACTIVITY_LED);
 			gba_mode(); // Set back
 		}
 		
@@ -400,7 +402,7 @@ int main(void) {
 			flashWriteWePin = USART_Receive();
 			
 			if (flashWriteWePin == WE_AS_AUDIO_PIN) {
-				DDRE |= (1<<AUDIO_PIN);
+				DDRB |= (1<<AUDIO_PIN);
 				audioPin_high;
 			}
 		}
@@ -431,9 +433,9 @@ int main(void) {
 			usart_read_chars(); // Read data byte
 			uint8_t flashByte = strtol(receivedBuffer, NULL, 16);
 			
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			gb_flash_write_bus_cycle(flashAddress, flashByte);
-			PORTD &= ~(1<<ACTIVITY_LED);
+			PORTB &= ~(1<<ACTIVITY_LED);
 			
 			USART_Transmit(SEND_ACK);
 		}
@@ -443,8 +445,8 @@ int main(void) {
 			usart_read_bytes(64);
 			start_timeout_timer();
 			
-			PORTD |= (1<<ACTIVITY_LED);
-			if (flashBank1CommandWrites == 0) {
+			PORTB |= (1<<ACTIVITY_LED);
+			if (flashBank1CommandWrites == 1) { //debug
 				for (uint8_t x = 0; x < 64; x++) {
 					if (receivedBuffer[x] != 0xFF) {
 						gb_flash_write_byte(address, receivedBuffer[x]);
@@ -468,7 +470,7 @@ int main(void) {
 		else if (receivedChar == GB_FLASH_WRITE_BUFFERED_32BYTE) {
 			usart_read_bytes(32);
 			start_timeout_timer();
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			
 			// Setup buffered write
 			gb_flash_write_bus_cycle(0xAAA, 0xAA);
@@ -504,7 +506,7 @@ int main(void) {
 		else if (receivedChar == GB_FLASH_WRITE_BUFFERED_256BYTE) {
 			usart_read_bytes(256);
 			start_timeout_timer();
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			
 			int16_t byteCounter = 0;
 			for (uint8_t b = 0; b < 8; b++) {
@@ -554,7 +556,7 @@ int main(void) {
 			usart_read_bytes(64);
 			start_timeout_timer();
 			
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			for (uint8_t x = 0; x < 64; x++) {
 				if (receivedBuffer[x] != 0xFF) {
 					gb_flash_write_byte_special(address, receivedBuffer[x]);
@@ -569,7 +571,7 @@ int main(void) {
 		else if (receivedChar == GB_FLASH_WRITE_256BYTE) {
 			usart_read_bytes(256);
 			start_timeout_timer();
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			
 			// Setup buffered write
 			gb_flash_write_bus_cycle(0xAAA, 0xA9);
@@ -603,7 +605,7 @@ int main(void) {
 		// Nintendo Power 1MB Cart, Write 128 bytes to flash
 		else if (receivedChar == GB_FLASH_WRITE_NP_128BYTE) {
 			usart_read_bytes(128);
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			
 			// Enable flash chip access
 			gb_flash_write_bus_cycle(0x120, 0x09);
@@ -673,14 +675,14 @@ int main(void) {
 			_delay_ms(10);
 			
 			USART_Transmit(SEND_ACK); // Send back acknowledgement
-			PORTD &= ~(1<<ACTIVITY_LED);
+			PORTB &= ~(1<<ACTIVITY_LED);
 		}
 		
 		// Buffered programming, write 32 bytes to Flash address
 		// Intel chips such as 28F640J5 (Thanks to lesserkuma for adding support)
 		else if (receivedChar == GB_FLASH_WRITE_INTEL_BUFFERED_32BYTE) {
 			usart_read_bytes(32);
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			
 			// Setup buffered write
 			gb_flash_write_bus_cycle(address, 0xE8);
@@ -734,12 +736,12 @@ int main(void) {
 				usart_read_chars(); // Read data
 				uint16_t flashByte = strtol(receivedBuffer, NULL, 16); // Convert data byte in hex to dec
 				
-				PORTD |= (1<<ACTIVITY_LED);
+				PORTB |= (1<<ACTIVITY_LED);
 				GBA_DDR_ROM_ADDR23_16 = 0xFF;
 				GBA_DDR_ROM_ADDR15_8 = 0xFF;
 				GBA_DDR_ROM_ADDR7_0 = 0xFF;
 				gba_flash_write_bus_cycle(flashAddress, flashByte);
-				PORTD &= ~(1<<ACTIVITY_LED);
+				PORTB &= ~(1<<ACTIVITY_LED);
 				
 				USART_Transmit(SEND_ACK); // Send back acknowledgement
 			}
@@ -747,7 +749,7 @@ int main(void) {
 		
 		// Write 64 or 256 bytes to Flash address (swapped command data bytes), combine 2 bytes and write one at a time (and increment address by 2), pulse a pin
 		else if (receivedChar == GBA_FLASH_WRITE_64BYTE_SWAPPED_D0D1 || receivedChar == GBA_FLASH_WRITE_256BYTE_SWAPPED_D0D1) {
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			
 			int readLength = 64;
 			if (receivedChar == GBA_FLASH_WRITE_256BYTE_SWAPPED_D0D1) {
@@ -769,7 +771,7 @@ int main(void) {
 		
 		// Write 256 bytes to Flash address, combine 2 bytes and write one at a time (and increment address by 2), pulse a pin
 		else if (receivedChar == GBA_FLASH_WRITE_256BYTE) {
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			
 			int readLength = 256;
 			usart_read_bytes(readLength);
@@ -789,7 +791,7 @@ int main(void) {
 		// Buffered programming, write 256 bytes to Flash address
 		else if (receivedChar == GBA_FLASH_WRITE_BUFFERED_256BYTE) {
 			usart_read_bytes(256);
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			
 			// Setup buffered write
 			int16_t byteCounter = 0;
@@ -863,7 +865,7 @@ int main(void) {
 		// Intel flash command based chips
 		// Write 64 bytes to Flash address, combine 2 bytes and write one at a time (and increment address by 2), pulse a pin
 		else if (receivedChar == GBA_FLASH_WRITE_INTEL_64BYTE) {
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			usart_read_bytes(64);
 			start_timeout_timer();
 			
@@ -934,7 +936,7 @@ int main(void) {
 		
 		// Intel word programming
 		else if (receivedChar == GBA_FLASH_WRITE_INTEL_64BYTE_WORD) {
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			usart_read_bytes(64);
 			start_timeout_timer();
 			
@@ -968,7 +970,7 @@ int main(void) {
 		// Write 256 bytes to Flash address, combine 2 bytes and write one at a time (and increment address by 2), pulse a pin
 		// Thanks to lesserkuma for adding support
 		else if (receivedChar == GBA_FLASH_WRITE_INTEL_INTERLEAVED_256BYTE) {
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			usart_read_bytes(256);
 			start_timeout_timer();
 			
@@ -1045,7 +1047,7 @@ int main(void) {
 		else if (receivedChar == GBA_FLASH_WRITE_SHARP_64BYTE) {
 			uint16_t status = 0;
 			
-			PORTD |= (1<<ACTIVITY_LED);
+			PORTB |= (1<<ACTIVITY_LED);
 			usart_read_bytes(64);
 			start_timeout_timer();
 			
@@ -1233,13 +1235,13 @@ int main(void) {
 			uint32_t resetValue = strtol(receivedBuffer, NULL, 16);
 			if (resetValue == RESET_VALUE) {
 				// Clear watchdog flag
-				MCUCSR &= ~(1<<WDRF);
+				MCUSR &= ~(1<<WDRF);
 				
 				// Start timed sequence
-				WDTCR = (1<<WDCE) | (1<<WDE);
+				WDTCSR = (1<<WDCE) | (1<<WDE);
 				
 				// Reset in 250 ms
-				WDTCR = (1<<WDP2) | (1<<WDE);
+				WDTCSR = (1<<WDP2) | (1<<WDE);
 				
 				// Wait for reset
 				_delay_loop_2(65535);
@@ -1250,6 +1252,6 @@ int main(void) {
 
 // Timeout after ~500ms which also blinks the LED
 ISR(TIMER1_OVF_vect) {
-	PORTD ^= (1<<ACTIVITY_LED);
+	PORTB ^= (1<<ACTIVITY_LED);
 	writingTimedout = 1;
 }

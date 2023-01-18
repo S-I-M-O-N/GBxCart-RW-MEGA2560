@@ -48,14 +48,17 @@ make all
 
 You can now connect to the Arduino with FlashGBX v2.8.
 Installation:
-https://github.com/S-I-M-O-N/FlashGBX.git
+git clone https://github.com/S-I-M-O-N/FlashGBX.git
 
 Run with
 python run.py
 
 
 Trouble-shooting:
-It happens that the serial port does not propery initialize.
+This FW and SW only works in this exact configuration. i.e. GBxCart RW v1.3 R22 and FLashGBX v2.8.
+Accordingly do not update the firmware nor the software.
+
+It happens that the serial port does not properly initialize.
 In this case you should open it with a serial terminal program at 1000000 baud first; e.g.:
 minicom -b 1000000 -D /dev/ttyUSB0 -H
 You can then the the connection by typing V which should be answered by 16
@@ -64,7 +67,3 @@ The FlashGBX software assumes that you have an Arduino with an CH340 serial chip
 Should you have a different chip you need to change the following line in hw_GBxCartRW_ofw.py to reflect your ids:
 	if comports[i].vid == 0x1A86 and comports[i].pid == 0x7523:
 You can check which ids you have by issuing the command lsusb in the shell.
-
-
-
-Should you h
